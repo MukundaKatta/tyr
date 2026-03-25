@@ -1,56 +1,98 @@
-# 🔱 Tyr — Convention Validator
+# Tyr -- Convention Validator
 
-> **Norse Mythology**: God of Justice | Automated PR/branch/commit naming convention validator
+> **Norse Mythology**: Tyr is the God of Justice and Law | Automated naming convention validation for Git workflows
 
-[![GitHub Pages](https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-blue?style=for-the-badge)](https://MukundaKatta.github.io/tyr/)
+[![GitHub Pages](https://img.shields.io/badge/Live_Demo-Visit_Site-blue?style=for-the-badge)](https://MukundaKatta.github.io/tyr/)
 [![GitHub](https://img.shields.io/github/license/MukundaKatta/tyr?style=flat-square)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/MukundaKatta/tyr?style=flat-square)](https://github.com/MukundaKatta/tyr/stargazers)
 
-## 🚀 Overview
+## Overview
 
-Automated PR/branch/commit naming convention validator
+Tyr validates branch names, commit messages, PR titles, and version strings against configurable rule sets. Rule-based validation with centralized rule management -- no external dependencies required.
 
-**Tech Stack:** TypeScript, GitHub Actions
+**Tech Stack:** Python 3.9+, zero dependencies
 
-## 📦 Quick Start
+## Features
 
-```bash
-git clone https://github.com/MukundaKatta/tyr.git
-cd tyr
-# Follow setup instructions below
+- **Conventional Commits** -- validates commit messages (`feat:`, `fix:`, `docs:`, etc.)
+- **Branch Naming** -- enforces `feature/`, `bugfix/`, `hotfix/` prefixes with optional ticket IDs
+- **PR Title** -- checks length limits and prefix requirements
+- **Semantic Version** -- validates `vX.Y.Z` strings with prerelease and build metadata support
+- **Custom Rules** -- fluent `RuleBuilder` API for project-specific conventions
+- **Multiple Output Formats** -- plain text, JSON, and GitHub Actions annotations
+
+## Quick Start
+
+```python
+from tyr import Validator, ConventionalCommits, BranchNaming
+
+validator = Validator()
+validator.register(ConventionalCommits.rule_set())
+validator.register(BranchNaming.rule_set())
+
+result = validator.validate("feat: add user login", target="commit")
+print(result.passed)  # True
+
+result = validator.validate("wip/stuff", target="branch")
+print(result.passed)  # False
 ```
 
-## 🏗️ Project Structure
+## Reporting
+
+```python
+from tyr import ValidationReporter
+
+reporter = ValidationReporter()
+reporter.add(result)
+print(reporter.as_text())
+print(reporter.as_github_commands())
+```
+
+## Custom Rules
+
+```python
+from tyr import RuleBuilder, RuleSet, Validator, Severity
+
+rule = (
+    RuleBuilder("no-wip")
+    .pattern(r"(?i)^wip")
+    .description("WIP commits are not allowed")
+    .severity(Severity.ERROR)
+    .inverse(True)
+    .build()
+)
+
+rule_set = RuleSet("custom", "commit")
+rule_set.add_rule(rule)
+
+v = Validator()
+v.register(rule_set)
+```
+
+## Running Tests
+
+```bash
+PYTHONPATH=src python3 -m pytest tests/ -v
+```
+
+## Project Structure
 
 ```
 tyr/
-├── README.md
-├── LICENSE
-├── CLAUDE.md
-├── .gitignore
-├── src/
-│   ├── main.py
-│   ├── config.py
-│   └── utils.py
-├── tests/
-│   └── test_main.py
-├── docs/
-│   └── architecture.md
-├── examples/
-│   └── basic_usage.py
-└── .github/
-    └── workflows/
-        └── static.yml
+  src/tyr/
+    __init__.py    -- Package exports
+    core.py        -- Rule, RuleSet, Validator, ValidationResult
+    rules.py       -- Built-in rule sets and RuleBuilder
+    reporter.py    -- Text, JSON, and GitHub annotation output
+  tests/
+    test_core.py
+    test_rules.py
+    test_reporter.py
 ```
 
-## 🌐 Live Demo
+## License
 
-Visit the landing page: **https://MukundaKatta.github.io/tyr/**
+MIT License
 
-## 📄 License
-
-MIT License — © 2026 Officethree Technologies
-
-## 🔱 Part of the Mythological Portfolio
+## Part of the Mythological Portfolio
 
 This is project **#tyr** in the [100-project Mythological Portfolio](https://github.com/MukundaKatta) by Officethree Technologies.
